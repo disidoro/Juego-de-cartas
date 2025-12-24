@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nombre de la aplicación -->
+    <string name="app_name">JuegoCartas</string>
+
+    <!-- Título del juego -->
+    <string name="titulo_juego_de_cartas">ME LLEVO 5</string>
+
+    <!-- Textos de la partida -->
+    <string name="turno_jugador">Turno de:</string>
+    <string name="baza_actual">Baza %1$d / 5</string>
+    <string name="cartas_mesa">Cartas en la mesa</string>
+    <string name="tus_cartas">Tus cartas</string>
+    <string name="pregunta_prediccion">¿Cuántas bazas crees que ganarás?</string>
+    <string name="hint_prediccion">0 - 5</string>
+    <string name="confirmar">Confirmar</string>
+
+</resources>

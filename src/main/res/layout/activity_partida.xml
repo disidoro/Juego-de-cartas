@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- INFO DE LA PARTIDA -->
+    <TextView
+        android:id="@+id/tvTurno"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/turno_jugador"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- INFO DEL JUGADOR ACTUAL -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvObjetivo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Objetivo: 0"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/tvGanadas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ganadas: 0"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/tvRestantes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Restantes: 0" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvBaza"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Baza 1 / 5"
+        android:layout_marginBottom="12dp" />
+
+    <!-- CARTAS EN LA MESA -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cartas_mesa"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp" />
+
+    <LinearLayout
+        android:id="@+id/layoutMesa"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp" />
+
+    <!-- CARTAS DEL JUGADOR ACTUAL -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tus_cartas"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/layoutMano"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp" />
+
+    <!-- ZONA DE PREDICCIÓN -->
+    <TextView
+        android:id="@+id/tvPrediccion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pregunta_prediccion"
+        android:layout_marginBottom="4dp" />
+
+    <EditText
+        android:id="@+id/edtPrediccion"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="@string/hint_prediccion"
+        android:inputType="number" />
+
+    <Button
+        android:id="@+id/btnConfirmar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/confirmar"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>
