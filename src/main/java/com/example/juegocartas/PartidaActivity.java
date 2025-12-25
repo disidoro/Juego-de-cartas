@@ -149,7 +149,7 @@ public class PartidaActivity extends AppCompatActivity {
         jugador.setPrediccion(pred);
         sumaPredicciones += pred;
 
-        // 👉 MOSTRAR PREDICCIÓN EN LA MESA
+        // Mostrar predicción en la mesa (opcional visual)
         TextView tvPred = new TextView(this);
         tvPred.setText(jugador.getNombreUsuario() + " predice " + pred + " baza(s)");
         tvPred.setPadding(16, 16, 16, 16);
@@ -157,16 +157,42 @@ public class PartidaActivity extends AppCompatActivity {
 
         indiceJugadorActual++;
 
+        // 👉 CUANDO TODOS HAN PREDICHO
         if (indiceJugadorActual >= jugadores.size()) {
-            faseActual = Fase.JUGAR_BAZA;
-            indiceJugadorActual = 0;
-            btnConfirmar.setEnabled(false);
-            edtPrediccion.setEnabled(false);
-            layoutMesa.removeAllViews(); // limpiar predicciones
-            Toast.makeText(this, "Empieza la ronda", Toast.LENGTH_SHORT).show();
+            mostrarDialogoResumenPredicciones();
+        } else {
+            mostrarJugadorActual();
+        }
+    }
+
+    // ----------- RESUMEN DE PREDICCIONES -----------
+    private void mostrarDialogoResumenPredicciones() {
+
+        StringBuilder resumen = new StringBuilder("Resumen de predicciones:\n\n");
+
+        for (Jugador j : jugadores) {
+            resumen.append(j.getNombreUsuario())
+                    .append(" predijo ")
+                    .append(j.getPrediccion())
+                    .append(" baza(s)\n");
         }
 
-        mostrarJugadorActual();
+        new AlertDialog.Builder(this)
+                .setTitle("Predicciones")
+                .setMessage(resumen.toString())
+                .setCancelable(false)
+                .setPositiveButton("Empezar ronda", (dialog, which) -> {
+
+                    faseActual = Fase.JUGAR_BAZA;
+                    indiceJugadorActual = 0;
+                    btnConfirmar.setEnabled(false);
+                    edtPrediccion.setEnabled(false);
+                    layoutMesa.removeAllViews(); // limpiar predicciones
+
+                    Toast.makeText(this, "Empieza la ronda", Toast.LENGTH_SHORT).show();
+                    mostrarJugadorActual();
+                })
+                .show();
     }
 
     // ----------- JUGAR CARTA -----------
