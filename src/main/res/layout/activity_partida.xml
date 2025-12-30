@@ -40,7 +40,16 @@
             android:id="@+id/tvRestantes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Restantes: 0" />
+            android:text="Restantes: 0"
+            android:layout_marginEnd="16dp" />
+
+        <!-- 🔴 VIDAS DEL JUGADOR -->
+        <TextView
+            android:id="@+id/tvVidas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vidas: 3"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <TextView

@@ -17,7 +17,7 @@ import java.util.List;
 public class PartidaActivity extends AppCompatActivity {
 
     // ----------- VISTAS -----------
-    private TextView tvTurno, tvObjetivo, tvGanadas, tvRestantes;
+    private TextView tvTurno, tvObjetivo, tvGanadas, tvRestantes, tvVidas;
     private LinearLayout layoutMano, layoutMesa;
     private Button btnConfirmar;
     private EditText edtPrediccion;
@@ -37,6 +37,9 @@ public class PartidaActivity extends AppCompatActivity {
     private static final int TOTAL_BAZAS = 5;
     private int sumaPredicciones = 0;
 
+    // Rondas: 5 → 4 → 3 → 2
+    private int bazasRondaActual = TOTAL_BAZAS;
+
     private final List<Carta> cartasEnMesa = new ArrayList<>();
     private final List<Jugador> jugadoresEnMesa = new ArrayList<>();
 
@@ -49,6 +52,8 @@ public class PartidaActivity extends AppCompatActivity {
         tvObjetivo = findViewById(R.id.tvObjetivo);
         tvGanadas = findViewById(R.id.tvGanadas);
         tvRestantes = findViewById(R.id.tvRestantes);
+        tvVidas = findViewById(R.id.tvVidas);
+
         layoutMano = findViewById(R.id.layoutMano);
         layoutMesa = findViewById(R.id.layoutMesa);
         btnConfirmar = findViewById(R.id.btnConfirmar);
@@ -61,7 +66,6 @@ public class PartidaActivity extends AppCompatActivity {
             return;
         }
 
-        baraja = crearBaraja();
         repartirCartas();
         mostrarJugadorActual();
 
@@ -84,11 +88,21 @@ public class PartidaActivity extends AppCompatActivity {
         return baraja;
     }
 
+    // ----------- REPARTIR CARTAS -----------
     private void repartirCartas() {
+        baraja = crearBaraja();
+        bazasJugadas = 0;
+        sumaPredicciones = 0;
+
+        cartasEnMesa.clear();
+        jugadoresEnMesa.clear();
+
         for (Jugador j : jugadores) {
             j.getCartas().clear();
             j.setBazasGanadas(0);
-            for (int i = 0; i < TOTAL_BAZAS; i++) {
+            j.setPrediccion(0);
+
+            for (int i = 0; i < bazasRondaActual; i++) {
                 j.getCartas().add(baraja.remove(0));
             }
         }
@@ -100,7 +114,9 @@ public class PartidaActivity extends AppCompatActivity {
 
         Jugador j = jugadores.get(indiceJugadorActual);
 
-        tvTurno.setText("Turno de: " + j.getNombreUsuario());
+        tvTurno.setText("Turno de: " + j.getNombreUsuario()
+                + " | Ronda de " + bazasRondaActual + " bazas");
+
         actualizarInfoJugador(j);
 
         layoutMano.removeAllViews();
@@ -123,6 +139,7 @@ public class PartidaActivity extends AppCompatActivity {
         tvObjetivo.setText("Objetivo: " + j.getPrediccion());
         tvGanadas.setText("Ganadas: " + j.getBazasGanadas());
         tvRestantes.setText("Restantes: " + restantes);
+        tvVidas.setText("Vidas: " + j.getVidas());
     }
 
     // ----------- PREDICCIÓN -----------
@@ -134,14 +151,15 @@ public class PartidaActivity extends AppCompatActivity {
         }
 
         int pred = Integer.parseInt(txt);
-        if (pred < 0 || pred > TOTAL_BAZAS) {
+
+        if (pred < 0 || pred > bazasRondaActual) {
             edtPrediccion.setError("Número no válido");
             return;
         }
 
         boolean ultimo = indiceJugadorActual == jugadores.size() - 1;
-        if (ultimo && sumaPredicciones + pred == TOTAL_BAZAS) {
-            edtPrediccion.setError("La suma no puede ser " + TOTAL_BAZAS);
+        if (ultimo && sumaPredicciones + pred == bazasRondaActual) {
+            edtPrediccion.setError("La suma no puede ser " + bazasRondaActual);
             return;
         }
 
@@ -149,7 +167,6 @@ public class PartidaActivity extends AppCompatActivity {
         jugador.setPrediccion(pred);
         sumaPredicciones += pred;
 
-        // Mostrar predicción en la mesa (opcional visual)
         TextView tvPred = new TextView(this);
         tvPred.setText(jugador.getNombreUsuario() + " predice " + pred + " baza(s)");
         tvPred.setPadding(16, 16, 16, 16);
@@ -157,7 +174,6 @@ public class PartidaActivity extends AppCompatActivity {
 
         indiceJugadorActual++;
 
-        // 👉 CUANDO TODOS HAN PREDICHO
         if (indiceJugadorActual >= jugadores.size()) {
             mostrarDialogoResumenPredicciones();
         } else {
@@ -165,7 +181,7 @@ public class PartidaActivity extends AppCompatActivity {
         }
     }
 
-    // ----------- RESUMEN DE PREDICCIONES -----------
+    // ----------- RESUMEN PREDICCIONES -----------
     private void mostrarDialogoResumenPredicciones() {
 
         StringBuilder resumen = new StringBuilder("Resumen de predicciones:\n\n");
@@ -182,14 +198,11 @@ public class PartidaActivity extends AppCompatActivity {
                 .setMessage(resumen.toString())
                 .setCancelable(false)
                 .setPositiveButton("Empezar ronda", (dialog, which) -> {
-
                     faseActual = Fase.JUGAR_BAZA;
                     indiceJugadorActual = 0;
                     btnConfirmar.setEnabled(false);
                     edtPrediccion.setEnabled(false);
-                    layoutMesa.removeAllViews(); // limpiar predicciones
-
-                    Toast.makeText(this, "Empieza la ronda", Toast.LENGTH_SHORT).show();
+                    layoutMesa.removeAllViews();
                     mostrarJugadorActual();
                 })
                 .show();
@@ -204,11 +217,6 @@ public class PartidaActivity extends AppCompatActivity {
 
         cartasEnMesa.add(carta);
         jugadoresEnMesa.add(jugador);
-
-        TextView tvMesa = new TextView(this);
-        tvMesa.setText(jugador.getNombreUsuario() + ": " + carta.getNombre());
-        tvMesa.setPadding(16, 16, 16, 16);
-        layoutMesa.addView(tvMesa);
 
         indiceJugadorActual = (indiceJugadorActual + 1) % jugadores.size();
 
@@ -235,52 +243,23 @@ public class PartidaActivity extends AppCompatActivity {
         ganador.setBazasGanadas(ganador.getBazasGanadas() + 1);
         bazasJugadas++;
 
-        mostrarDialogoBaza(ganador, mejor);
+        cartasEnMesa.clear();
+        jugadoresEnMesa.clear();
+
+        if (bazasJugadas >= bazasRondaActual) {
+            faseActual = Fase.FIN_RONDA;
+            mostrarDialogoFinRonda();
+        } else {
+            indiceJugadorActual = jugadores.indexOf(ganador);
+            mostrarJugadorActual();
+        }
     }
 
     private int fuerzaCarta(Carta c) {
         return c.getValor() == 1 ? 100 : c.getValor();
     }
 
-    // ----------- DIÁLOGOS -----------
-    private void mostrarDialogoBaza(Jugador ganador, Carta cartaGanadora) {
-
-        StringBuilder msg = new StringBuilder("Cartas jugadas:\n\n");
-
-        for (int i = 0; i < cartasEnMesa.size(); i++) {
-            msg.append(jugadoresEnMesa.get(i).getNombreUsuario())
-                    .append(": ")
-                    .append(cartasEnMesa.get(i).getNombre())
-                    .append("\n");
-        }
-
-        msg.append("\nGana la baza:\n")
-                .append(ganador.getNombreUsuario())
-                .append(" con ")
-                .append(cartaGanadora.getNombre());
-
-        new AlertDialog.Builder(this)
-                .setTitle("Resultado de la baza")
-                .setMessage(msg.toString())
-                .setCancelable(false)
-                .setPositiveButton("Siguiente", (d, w) -> {
-
-                    cartasEnMesa.clear();
-                    jugadoresEnMesa.clear();
-                    layoutMesa.removeAllViews();
-
-                    if (bazasJugadas >= TOTAL_BAZAS) {
-                        faseActual = Fase.FIN_RONDA;
-                        mostrarDialogoFinRonda();
-                        return;
-                    }
-
-                    indiceJugadorActual = jugadores.indexOf(ganador);
-                    mostrarJugadorActual();
-                })
-                .show();
-    }
-
+    // ----------- FIN DE RONDA -----------
     private void mostrarDialogoFinRonda() {
 
         StringBuilder resumen = new StringBuilder("FIN DE LA RONDA\n\n");
@@ -297,7 +276,10 @@ public class PartidaActivity extends AppCompatActivity {
                     .append(j.getPrediccion())
                     .append(" → pierde ")
                     .append(diferencia)
-                    .append(" vida(s)\n\n");
+                    .append(" vida(s)\n")
+                    .append("Vidas restantes: ")
+                    .append(j.getVidas())
+                    .append("\n\n");
         }
 
         new AlertDialog.Builder(this)
@@ -305,7 +287,23 @@ public class PartidaActivity extends AppCompatActivity {
                 .setMessage(resumen.toString())
                 .setCancelable(false)
                 .setPositiveButton("Aceptar", (dialog, which) -> {
-                    tvTurno.setText("Ronda finalizada");
+
+                    bazasRondaActual--;
+
+                    if (bazasRondaActual < 2) {
+                        tvTurno.setText("Fin de la partida");
+                        Toast.makeText(this, "La partida ha terminado", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    faseActual = Fase.PREDICCION;
+                    indiceJugadorActual = 0;
+                    edtPrediccion.setEnabled(true);
+                    btnConfirmar.setEnabled(true);
+                    edtPrediccion.setText("");
+
+                    repartirCartas();
+                    mostrarJugadorActual();
                 })
                 .show();
     }
